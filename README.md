@@ -11,7 +11,7 @@
 ---------------------------------------------
 ### Connect Agensgraph Database
 
-''' python
+``` python
 
 from AgensConnector import *
 
@@ -25,28 +25,28 @@ connect_info = {
 
 agconn = AgensConnector(**connect_info)
 
-''' 
+```
 
 OR
 
-''' python
+``` python
 agconn = AgensConnector(your_ip, your_port, database , user , password)
-'''
+```
 
 ----------------------------------------------------
 ### Load graph
 
 Split your dataframe into vertex & edge 
 
-''' python 
+``` python 
 v1,e1,v2=df.iloc[:,0:3],df.iloc[:,3:8],df.iloc[:,8:]
-'''
+```
 
 
-Fill out your graph & label info
+Set your graph & label info 
+Execute load graph
 
-
-''' python 
+``` python 
 
 param_dict = {}
 param_dict['dfv1']=v1
@@ -62,4 +62,4 @@ param_dict['key2']='vio_nm'
 
 agconn.load_graph(**param_dict)
 
-''' 
+``` 
