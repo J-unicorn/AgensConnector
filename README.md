@@ -52,12 +52,12 @@ param_dict = {}
 param_dict['dfv1']=v1
 param_dict['dfv2']=v2
 param_dict['dfe1']=e1
-param_dict['graph']='vio_test'
-param_dict['vlabel1']='vt_vio'
-param_dict['vlabel2']='vt_vio'
-param_dict['elabel']='edg_viocng'
-param_dict['key1']='vio_nm'
-param_dict['key2']='vio_nm'
+param_dict['graph']='your_graph'
+param_dict['vlabel1']='vertex label1'
+param_dict['vlabel2']='vertex label2'
+param_dict['elabel']='edge label'
+param_dict['key1']='vertex key1'
+param_dict['key2']='vertex key2'
 
 
 agconn.load_graph(**param_dict)
