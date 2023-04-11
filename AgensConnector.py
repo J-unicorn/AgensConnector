@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
@@ -19,8 +14,16 @@ import psycopg2 as pg2
 from datetime import datetime as dt
 from sqlalchemy import create_engine
 
+class SingletonMeta(type):
+    _instances = {}
 
-class AgensConnector:
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]    
+
+
+class AgensConnector(metaclass=SingletonMeta):
  
     def __init__(self, host, port, database, user, password, graph_path = None, autocommit=True):
         self.db_params = self.agensConfig(host, port, database, user, password)
@@ -28,6 +31,7 @@ class AgensConnector:
         self.conn = pg2.connect(**self.db_params)
         self.cur = self.conn.cursor()
         self.conn.autocommit = autocommit
+        self.set_graph(graph_path)
         print('Successful connection to agensgraph!')
         print('connection_info')
         print(self.db_params)
@@ -37,6 +41,10 @@ class AgensConnector:
         self.close_agens()
         print('close the agensgraph connection!')
 
+    def conn_info(self):
+        db_config = self.db_params
+        return db_config    
+        
     def agensConfig(self, host, port, database, user, password):
         db_config = {"host":host, "port":port, "database":database, "user":user, "password":password}
         return db_config
@@ -69,6 +77,21 @@ class AgensConnector:
         self.conn.commit()          
     
     # transform pandas from agensquery
+
+    def query_one(self,query):
+        try:
+            self.query = query
+            conn = self.conn
+            cur = self.cur
+            cur.execute(self.query)
+            result = cur.fetchone
+
+        except (Exception, pg2.DatabaseError) as error:
+            print('[%s][ERR|query_pandas] %s' % (str(dt.now()), error))
+            print(query)
+            conn.rollback()    
+
+
     def query_pandas(self,query,table =None,graph=None, header=True):
         try:
             self.query = query
@@ -83,11 +106,12 @@ class AgensConnector:
             
             cur.execute(self.query)
             result = cur.fetchall()
-
+            
             if not result:
-                return 
-
+                return pd.DataFrame()
+            
             result = pd.DataFrame(result)
+            
             
             if header:
 
@@ -97,7 +121,7 @@ class AgensConnector:
                 self.query_column = self.query + ' LIMIT 0'
                 cur.execute(self.query_column)
                 result.columns = [desc[0] for desc in cur.description]
-                 
+            
             return result
 
         except (Exception, pg2.DatabaseError) as error:
